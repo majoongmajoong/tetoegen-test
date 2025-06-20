@@ -96,6 +96,50 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15); /* Soft shadow */
             color: #a0aec0; /* Slightly darker than default placeholder color */
         }
+
+        /* Custom radio button styling */
+        input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            display: inline-block;
+            position: relative;
+            width: 20px; /* h-5 */
+            height: 20px; /* w-5 */
+            border: 2px solid #d1d5db; /* gray-300 */
+            border-radius: 50%;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        input[type="radio"]:checked {
+            background-color: #4f46e5; /* indigo-600 for checked state */
+            border-color: #4f46e5;
+        }
+
+        input[type="radio"]:checked::before {
+            content: '';
+            display: block;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Specific colors for male/female radio buttons */
+        input[type="radio"][value="male"]:checked {
+            background-color: #3b82f6; /* blue-500 */
+            border-color: #3b82f6;
+        }
+        input[type="radio"][value="female"]:checked {
+            background-color: #ec4899; /* pink-500 */
+            border-color: #ec4899;
+        }
     </style>
 </head>
 <body>
@@ -107,15 +151,29 @@
                 당신은 어떤 호르몬 성향을 가지고 있을까요? <br>
                 재미로 알아보는 나의 테오-에겐 유형!
             </p>
+
+            <!-- 성별 선택 섹션 추가 -->
+            <div class="mb-8">
+                <p class="text-gray-700 text-xl mb-5 font-semibold">당신은 누구인가요?</p>
+                <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8">
+                    <label for="gender-male" class="flex items-center cursor-pointer p-3 rounded-lg hover:bg-blue-50 transition-colors duration-200">
+                        <input type="radio" id="gender-male" name="gender" value="male">
+                        <span class="ml-2 text-gray-800 text-lg font-medium">👦 남성</span>
+                    </label>
+                    <label for="gender-female" class="flex items-center cursor-pointer p-3 rounded-lg hover:bg-pink-50 transition-colors duration-200">
+                        <input type="radio" id="gender-female" name="gender" value="female">
+                        <span class="ml-2 text-gray-800 text-lg font-medium">👧 여성</span>
+                    </label>
+                </div>
+            </div>
+            <!-- 성별 선택 섹션 끝 -->
+
             <button id="start-button" class="group relative overflow-hidden bg-gradient-to-r from-pink-400 to-purple-500 text-white font-extrabold py-5 px-10 rounded-full shadow-xl hover:from-pink-500 hover:to-purple-600 transition-all duration-500 transform hover:scale-105">
                 <span class="relative z-10">테스트 시작하기</span>
                 <span class="absolute inset-0 bg-white opacity-20 transform scale-0 group-hover:scale-100 transition-transform duration-500 ease-out"></span>
             </button>
             <div class="mt-10 w-full max-w-sm flex flex-col sm:flex-row items-center justify-center">
-                <!-- Placeholder text updated -->
-                <!-- flex-grow를 사용하여 input이 가능한 공간을 모두 채우도록 하고, sm:flex-none으로 작은 화면에서는 다시 본래 크기로 돌아오게 합니다. -->
                 <input type="text" id="direct-type-input" placeholder="예: 테토남 테토녀" class="w-full flex-grow p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 mr-0 sm:mr-3 mb-3 sm:mb-0 text-base">
-                <!-- sm:flex-none으로 버튼이 줄어들지 않고 고정된 크기를 유지하게 합니다. -->
                 <button id="direct-type-button" class="w-full sm:w-auto sm:flex-none bg-blue-100 text-blue-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 transform hover:scale-105 whitespace-nowrap">
                     결과 바로보기
                 </button>
@@ -403,6 +461,9 @@
         const directTypeInput = document.getElementById('direct-type-input');
         const directTypeButton = document.getElementById('direct-type-button');
 
+        // Gender radio buttons
+        const genderRadios = document.querySelectorAll('input[name="gender"]');
+
         const questionText = document.getElementById('question-text');
         const optionsContainer = document.getElementById('options-container');
         const currentQuestionNum = document.getElementById('current-question-num');
@@ -428,6 +489,7 @@
 
         let currentQuestionIndex = 0;
         let userScores = { tetoMan: 0, egenMan: 0, tetoWoman: 0, egenWoman: 0 };
+        let selectedGender = null; // Stores 'male' or 'female'
 
         // ----------------------------------------------------
         // 3. UI and Quiz Logic Functions
@@ -436,7 +498,7 @@
         // Function to show the message modal
         function showMessage(message) {
             modalMessage.innerText = message;
-            modalMessage.style.display = 'flex'; // Make the modal visible
+            messageModal.style.display = 'flex'; // Make the modal visible
         }
 
         // Function to close the modal
@@ -446,12 +508,17 @@
 
         // Function to start the quiz
         function startQuiz() {
+            if (!selectedGender) {
+                showMessage("테스트를 시작하려면 먼저 성별을 선택해주세요!");
+                return; // Stop the quiz from starting
+            }
+
             startScreen.classList.add('hidden');
             quizScreen.classList.remove('hidden');
             resultScreen.classList.add('hidden');
             currentQuestionIndex = 0;
             userScores = { tetoMan: 0, egenMan: 0, tetoWoman: 0, egenWoman: 0 };
-            totalQuestionsNum.innerText = quizQuestions.length; // Correctly sets total questions to 15
+            totalQuestionsNum.innerText = quizQuestions.length;
             displayQuestion();
             updateProgressBar();
         }
@@ -503,17 +570,24 @@
 
             let finalType = forcedType;
             if (!finalType) {
-                // Determine the final type based on scores
+                // Determine the final type based on selected gender and scores
                 let maxScore = -1;
-                for (const type in userScores) {
-                    if (userScores[type] > maxScore) {
-                        maxScore = userScores[type];
-                        finalType = type;
-                    } else if (userScores[type] === maxScore) {
-                        // If scores are tied, the first type encountered with max score is chosen.
-                        // Additional logic can be added here for tie-breaking or showing multiple types.
+                let determinedType = null;
+
+                if (selectedGender === 'male') {
+                    if (userScores.tetoMan >= userScores.egenMan) {
+                        determinedType = 'tetoMan';
+                    } else {
+                        determinedType = 'egenMan';
+                    }
+                } else if (selectedGender === 'female') {
+                    if (userScores.tetoWoman >= userScores.egenWoman) {
+                        determinedType = 'tetoWoman';
+                    } else {
+                        determinedType = 'egenWoman';
                     }
                 }
+                finalType = determinedType;
             }
 
             // Populate result data
@@ -531,7 +605,7 @@
                 resultNeeds.innerText = typeInfo.needs;
                 resultExtraContent.innerText = typeInfo.extraContent;
             } else {
-                showMessage("죄송합니다. 정확한 유형 이름을 입력해주세요. (예: 테토남, 에겐남, 테토녀, 에겐녀)");
+                showMessage("죄송합니다. 정확한 유형 이름을 찾을 수 없습니다. 다시 시작해주세요.");
                 startQuiz(); // Go back to start screen on error
             }
         }
@@ -545,26 +619,32 @@
         closeModalButton.addEventListener('click', closeModal);
         modalOkButton.addEventListener('click', closeModal);
 
+        // Listen for gender selection changes
+        genderRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                selectedGender = event.target.value;
+            });
+        });
+
         directTypeButton.addEventListener('click', () => {
             const input = directTypeInput.value.trim();
             let matchedType = null;
-            // Find the matching type based on user input (e.g., "테토남" -> "tetoMan")
-            // Normalize input by converting to lowercase and removing spaces for flexible matching
             const normalizedInput = input.toLowerCase().replace(/\s/g, '');
 
             for (const key in typeDefinitions) {
                 const normalizedTypeName = typeDefinitions[key].name.toLowerCase().replace(/\s/g, '');
-                // Check if the input is included in the type name, or vice versa (for partial matches)
-                // Example: '테토남' matches '테토남 (테스토스테론 남성)' or '테토' matches '테토남'
                 if (normalizedTypeName.includes(normalizedInput) || normalizedInput.includes(normalizedTypeName.split('(')[0].trim())) {
                     matchedType = key;
                     break;
                 }
             }
             if (matchedType) {
+                // For direct type, we don't enforce gender selection.
+                // However, the selected type should logically match its gender if one was previously selected.
+                // For simplicity, direct type input overrides regular quiz flow.
                 showResult(matchedType);
             } else {
-                showMessage("죄송합니다. 정확한 유형 이름을 입력해주세요. (예: 테토남, 에겐남, 테토녀, 에겐녀)");
+                showMessage("죄송합니다. 정확한 유형 이름을 입력해주세요. (예: 테토남, 테토녀)");
             }
         });
 
