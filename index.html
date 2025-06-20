@@ -112,8 +112,11 @@
                 <span class="absolute inset-0 bg-white opacity-20 transform scale-0 group-hover:scale-100 transition-transform duration-500 ease-out"></span>
             </button>
             <div class="mt-10 w-full max-w-sm flex flex-col sm:flex-row items-center justify-center">
-                <input type="text" id="direct-type-input" placeholder="예: 테토남 테토녀 에겐남 에겐녀" class="w-full sm:w-auto flex-grow p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 mr-0 sm:mr-3 mb-3 sm:mb-0 text-base">
-                <button id="direct-type-button" class="w-full sm:w-auto bg-blue-100 text-blue-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 transform hover:scale-105 whitespace-nowrap">
+                <!-- Placeholder text updated -->
+                <!-- flex-grow를 사용하여 input이 가능한 공간을 모두 채우도록 하고, sm:flex-none으로 작은 화면에서는 다시 본래 크기로 돌아오게 합니다. -->
+                <input type="text" id="direct-type-input" placeholder="예: 테토남 테토녀" class="w-full flex-grow p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 mr-0 sm:mr-3 mb-3 sm:mb-0 text-base">
+                <!-- sm:flex-none으로 버튼이 줄어들지 않고 고정된 크기를 유지하게 합니다. -->
+                <button id="direct-type-button" class="w-full sm:w-auto sm:flex-none bg-blue-100 text-blue-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 transform hover:scale-105 whitespace-nowrap">
                     결과 바로보기
                 </button>
             </div>
@@ -438,7 +441,7 @@
 
         // Function to close the modal
         function closeModal() {
-            messageModal.style.display = 'none'; // Hide the modal (Corrected from modalModal)
+            messageModal.style.display = 'none'; // Hide the modal
         }
 
         // Function to start the quiz
