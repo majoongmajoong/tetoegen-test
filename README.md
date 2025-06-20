@@ -1,1 +1,580 @@
-# tetoegen-test
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ 테오 에겐 성격 테스트 ✨</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter 폰트 임포트 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        /* Ensure html and body take full height of the viewport */
+        html, body {
+            height: 100%; /* Make html and body take full viewport height */
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* CRITICAL: Prevents scrollbars on the html/body itself */
+            box-sizing: border-box; /* Include padding/border in total size for consistent calculations */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex; /* Use flexbox to center the container vertically and horizontally */
+            justify-content: center;
+            align-items: center;
+            padding: 20px; /* Creates a consistent visual margin around the central container */
+        }
+
+        .container {
+            max-width: 700px; /* Desktop max width */
+            width: 100%; /* Mobile full width */
+            background-color: #ffffff;
+            border-radius: 16px; /* More rounded corners */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+            
+            /* CRITICAL for containing scroll: */
+            /* The container takes 100% of the available height from its flex parent (body's content area). */
+            /* If its internal content overflows this height, then the container's own scrollbar activates. */
+            height: 100%; 
+            overflow-y: auto; /* Enables vertical scrolling *within this container* if content overflows */
+            -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS devices */
+
+            padding: 35px; /* Internal padding for content within the container */
+        }
+
+        /* Adjust container's internal padding for smaller screens for better fit */
+        @media (max-width: 640px) {
+            .container {
+                padding: 25px; /* Smaller internal padding on mobile */
+            }
+        }
+
+        /* Custom modal styles for messages/alerts */
+        .modal {
+            display: none; /* Hidden by default, JS will change to 'flex' */
+            position: fixed; /* Stays in place relative to the viewport */
+            z-index: 1000; /* Stays on top of other content */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enables scrolling for modal content if it's too long */
+            background-color: rgba(0,0,0,0.5); /* Semi-transparent black overlay */
+            align-items: center; /* Center modal content vertically */
+            justify-content: center; /* Center modal content horizontally */
+        }
+        .modal-content {
+            background-color: #fefefe; /* White background for modal box */
+            margin: auto; /* Auto margins for centering (when not flex) */
+            padding: 40px; /* Internal padding */
+            border-radius: 12px; /* Rounded corners for the modal box */
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4); /* Shadow for depth */
+            max-width: 450px; /* Max width for readability */
+            width: 90%; /* Responsive width */
+            text-align: center;
+            position: relative; /* For positioning the close button */
+        }
+        .close-button {
+            color: #999;
+            position: absolute; /* Position relative to .modal-content */
+            top: 15px;
+            right: 20px;
+            font-size: 32px; /* Larger font size */
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease; /* Smooth color transition on hover */
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #555;
+        }
+
+        /* Placeholder text with subtle shading */
+        #direct-type-input::placeholder {
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15); /* Soft shadow */
+            color: #a0aec0; /* Slightly darker than default placeholder color */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Start Screen -->
+        <div id="start-screen" class="flex flex-col items-center justify-center text-center">
+            <h1 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-4">✨ 테오 에겐 성격 테스트 ✨</h1>
+            <p class="text-gray-600 mb-10 text-lg lg:text-xl leading-relaxed">
+                당신은 어떤 호르몬 성향을 가지고 있을까요? <br>
+                재미로 알아보는 나의 테오-에겐 유형!
+            </p>
+            <button id="start-button" class="group relative overflow-hidden bg-gradient-to-r from-pink-400 to-purple-500 text-white font-extrabold py-5 px-10 rounded-full shadow-xl hover:from-pink-500 hover:to-purple-600 transition-all duration-500 transform hover:scale-105">
+                <span class="relative z-10">테스트 시작하기</span>
+                <span class="absolute inset-0 bg-white opacity-20 transform scale-0 group-hover:scale-100 transition-transform duration-500 ease-out"></span>
+            </button>
+            <div class="mt-10 w-full max-w-sm flex flex-col sm:flex-row items-center justify-center">
+                <input type="text" id="direct-type-input" placeholder="예: 테토남 테토녀 에겐남 에겐녀" class="w-full sm:w-auto flex-grow p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 mr-0 sm:mr-3 mb-3 sm:mb-0 text-base">
+                <button id="direct-type-button" class="w-full sm:w-auto bg-blue-100 text-blue-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 transform hover:scale-105 whitespace-nowrap">
+                    결과 바로보기
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="text-center mb-8">
+                <p class="text-gray-500 text-base mb-3"><span id="current-question-num">1</span> / <span id="total-questions-num">15</span></p>
+                <div class="w-full bg-gray-200 rounded-full h-3.5">
+                    <div id="progress-bar" class="bg-gradient-to-r from-pink-400 to-purple-500 h-3.5 rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="p-8 bg-white rounded-xl shadow-xl">
+                <h2 id="question-text" class="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800 leading-tight"></h2>
+                <div id="options-container" class="space-y-4">
+                    <!-- Answer buttons will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden text-center">
+            <h2 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-6">당신의 테오 에겐 유형은?</h2>
+            <img id="result-character-image" src="" alt="결과 캐릭터 이미지" class="w-44 h-44 rounded-full mx-auto mb-7 border-4 border-purple-500 shadow-xl object-cover transform transition-transform duration-300 hover:scale-105">
+            <h3 id="result-type-name" class="text-3xl font-extrabold text-indigo-700 mb-4 animate-pulse"></h3>
+            <p id="result-one-liner" class="text-xl font-semibold text-gray-700 mb-6 px-2 italic">
+                <!-- 한줄 요약 -->
+            </p>
+            <p id="result-summary" class="text-lg text-gray-700 mb-8 leading-relaxed px-2"></p>
+
+            <div class="grid md:grid-cols-2 gap-7 mb-10">
+                <div class="bg-purple-50 p-5 rounded-xl shadow-lg border border-purple-200">
+                    <h4 class="text-xl sm:text-2xl font-semibold text-purple-700 mb-3">💖 연애 스타일</h4>
+                    <p id="result-love-style" class="text-gray-600 text-base leading-relaxed"></p>
+                </div>
+                <div class="bg-indigo-50 p-5 rounded-xl shadow-lg border border-indigo-200">
+                    <h4 class="text-xl sm:text-2xl font-semibold text-indigo-700 mb-3">🤝 사회적 특성</h4>
+                    <p id="result-social-trait" class="text-gray-600 text-base leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- New sections for compatibility and what's needed -->
+            <div class="grid md:grid-cols-2 gap-7 mb-10">
+                <div class="bg-green-50 p-5 rounded-xl shadow-lg border border-green-200">
+                    <h4 class="text-xl sm:text-2xl font-semibold text-green-700 mb-3">✅ 궁합이 좋은 유형</h4>
+                    <p id="result-good-compatibility" class="text-gray-600 text-base leading-relaxed"></p>
+                </div>
+                <div class="bg-red-50 p-5 rounded-xl shadow-lg border border-red-200">
+                    <h4 class="text-xl sm:text-2xl font-semibold text-red-700 mb-3">⚠️ 궁합이 어려운 유형</h4>
+                    <p id="result-bad-compatibility" class="text-gray-600 text-base leading-relaxed"></p>
+                </div>
+            </div>
+
+            <div class="mt-10 p-5 bg-blue-50 rounded-xl shadow-inner border border-blue-200">
+                <h4 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-3">💡 나에게 필요한 점</h4>
+                <p id="result-needs" class="text-gray-700 text-base leading-relaxed"></p>
+            </div>
+
+            <div class="mt-10 p-5 bg-yellow-100 rounded-xl shadow-inner border border-yellow-300">
+                <h4 class="text-xl sm:text-2xl font-semibold text-yellow-800 mb-3">✨ 당신에게 추천하는 콘텐츠/직업</h4>
+                <p id="result-extra-content" class="text-gray-700 text-base leading-relaxed"></p>
+            </div>
+
+            <button id="restart-button" class="mt-10 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-extrabold py-4 px-8 rounded-full shadow-xl hover:from-green-500 hover:to-emerald-600 transition-all duration-300 transform hover:scale-105">
+                다시 테스트하기
+            </button>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="message-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-modal-button">&times;</span>
+            <p id="modal-message" class="text-lg text-gray-700 mb-6"></p>
+            <button id="modal-ok-button" class="bg-blue-500 text-white font-semibold py-3 px-6 rounded-md hover:bg-blue-600 transition-colors duration-200 shadow-md">확인</button>
+        </div>
+    </div>
+
+    <script>
+        // ----------------------------------------------------
+        // 1. 테스트 데이터 및 유형 정의
+        // ----------------------------------------------------
+
+        // Quiz Questions Data (total 15 questions)
+        const quizQuestions = [
+            {
+                question: "갈등 상황에서 당신의 주된 반응은?",
+                options: [
+                    { text: "문제를 직면하고 해결책을 찾으려 한다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "감정을 조절하고 상대방의 입장을 이해하려 노력한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } },
+                    { text: "상황을 피하고 시간이 해결해주길 기다린다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "논리적으로 상황을 분석하고 나의 주장을 강하게 내세운다.", scores: { tetoMan: 3, tetoWoman: 1, egenMan: 0, egenWoman: 0 } }
+                ]
+            },
+            {
+                question: "새로운 사람들과 만났을 때, 당신은?",
+                options: [
+                    { text: "먼저 다가가 대화를 주도한다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "조용히 관찰하며 상대방의 접근을 기다린다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "무리 속에서 활동하며 분위기를 띄운다.", scores: { tetoMan: 1, tetoWoman: 1, egenMan: 0, egenWoman: 0 } },
+                    { text: "개인적인 관심사에 대해 이야기하는 것을 선호한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } }
+                ]
+            },
+            {
+                question: "취미 생활을 선택할 때, 당신의 기준은?",
+                options: [
+                    { text: "활동적이고 도전적인 것을 선호한다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "내면의 감수성을 자극하는 예술/문화 활동을 즐긴다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "실용적이고 성과를 낼 수 있는 것을 추구한다.", scores: { tetoMan: 1, tetoWoman: 0, egenMan: 0, egenWoman: 0 } },
+                    { text: "혼자만의 시간을 가지며 편안하게 휴식할 수 있는 것을 좋아한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } }
+                ]
+            },
+            {
+                question: "패션 스타일에 대한 당신의 태도는?",
+                options: [
+                    { text: "유행보다는 간결하고 클래식한 것을 선호한다.", scores: { tetoMan: 2, tetoWoman: 0, egenMan: 0, egenWoman: 0 } },
+                    { text: "트렌드에 민감하며, 미적 감각을 드러내는 것을 즐긴다.", scores: { tetoMan: 0, tetoWoman: 1, egenMan: 2, egenWoman: 0 } },
+                    { text: "실용성과 편안함이 가장 중요하다.", scores: { tetoMan: 1, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "여성스럽거나 부드러운 분위기의 스타일을 선호한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 2 } }
+                ]
+            },
+            {
+                question: "연애할 때 당신의 주된 모습은?",
+                options: [
+                    { text: "직접 대시하고 관계를 주도하는 편이다.", scores: { tetoMan: 3, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "감정적 교감과 섬세한 소통을 중요하게 생각한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "문제 발생 시 회피하기보다 직면하여 해결하려 한다.", scores: { tetoMan: 1, tetoWoman: 1, egenMan: 0, egenWoman: 0 } },
+                    { text: "상대방의 대시를 기다리거나, 부드러운 분위기에서 관계가 시작되길 바란다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } }
+                ]
+            },
+            {
+                question: "새로운 프로젝트를 시작할 때, 당신은 주로 무엇에 집중하나요?",
+                options: [
+                    { text: "빠르게 실행하고 결과를 내는 것.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "철저한 계획과 세부 사항을 검토하는 것.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "팀원들과의 협력과 소통을 중요시하는 것.", scores: { tetoMan: 1, tetoWoman: 1, egenMan: 1, egenWoman: 1 } },
+                    { text: "새로운 아이디어를 구상하고 창의적인 접근을 시도하는 것.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } }
+                ]
+            },
+            {
+                question: "스트레스를 받을 때, 당신은 어떻게 해소하나요?",
+                options: [
+                    { text: "운동이나 활동적인 취미로 에너지를 발산한다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "혼자 조용히 생각하거나 휴식을 취한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "친구들과 수다를 떨거나 감정적인 교류를 한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } },
+                    { text: "문제의 원인을 분석하고 해결책을 찾으려 한다.", scores: { tetoMan: 1, tetoWoman: 1, egenMan: 0, egenWoman: 0 } }
+                ]
+            },
+            {
+                question: "타인의 감정에 대해 당신은 얼마나 민감한가요?",
+                options: [
+                    { text: "매우 민감하게 반응하며 공감 능력이 높다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "감정보다는 논리적인 상황 파악을 우선시한다.", scores: { tetoMan: 2, tetoWoman: 1, egenMan: 0, egenWoman: 0 } },
+                    { text: "필요할 때만 반응하며, 깊이 몰입하지 않는다.", scores: { tetoMan: 1, tetoWoman: 0, egenMan: 0, egenWoman: 0 } },
+                    { text: "감정적인 표현보다는 실질적인 도움을 주려 한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 0 } }
+                ]
+            },
+            {
+                question: "쇼핑을 할 때 당신의 구매 기준은?",
+                options: [
+                    { text: "실용성과 기능성을 최우선으로 고려한다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "디자인과 미적 감각, 그리고 트렌드를 중요시한다.", scores: { tetoMan: 0, tetoWoman: 1, egenMan: 2, egenWoman: 2 } },
+                    { text: "가성비를 따지고 빠르게 결정한다.", scores: { tetoMan: 1, tetoWoman: 0, egenMan: 0, egenWoman: 0 } },
+                    { text: "오래 고민하며 여러 대안을 비교한 후 신중하게 구매한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } }
+                ]
+            },
+            {
+                question: "팀워크 환경에서 당신이 선호하는 역할은?",
+                options: [
+                    { text: "주도적으로 방향을 제시하고 팀을 이끌어간다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "팀원들의 의견을 조율하고 분위기를 부드럽게 만든다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } },
+                    { text: "맡은 바를 묵묵히 완수하며 실질적인 기여를 한다.", scores: { tetoMan: 1, tetoWoman: 1, egenMan: 0, egenWoman: 0 } },
+                    { text: "창의적인 아이디어를 제안하고 새로운 시도를 돕는다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } }
+                ]
+            },
+            {
+                question: "주말 계획을 세울 때, 당신은 어떤 활동을 선호하나요?",
+                options: [
+                    { text: "새로운 곳을 탐험하거나 활동적인 스포츠를 즐긴다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "집에서 편안하게 휴식하거나 영화/책을 감상한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "친구들과 만나 즐거운 시간을 보내거나 파티를 주최한다.", scores: { tetoMan: 1, tetoWoman: 1, egenMan: 0, egenWoman: 0 } },
+                    { text: "조용히 자신을 돌아보고 내면의 평화를 찾는 시간을 갖는다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } }
+                ]
+            },
+            {
+                question: "새로운 기술이나 지식을 접했을 때, 당신의 반응은?",
+                options: [
+                    { text: "바로 적용해보고 실질적인 효과를 실험한다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "깊이 파고들어 원리와 배경을 이해하려 노력한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "유용하다고 판단되면 주변 사람들에게 적극적으로 공유한다.", scores: { tetoMan: 1, tetoWoman: 1, egenMan: 0, egenWoman: 0 } },
+                    { text: "새로운 정보 자체를 즐기며 흥미롭게 탐색한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } }
+                ]
+            },
+            {
+                question: "누군가 당신에게 도움을 요청했을 때, 당신은?",
+                options: [
+                    { text: "바로 해결책을 제시하거나 직접 나서서 도와준다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "상대방의 감정을 공감하고 경청하며 위로를 건넨다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "도움을 줄 수 있는 실질적인 방법을 모색한다.", scores: { tetoMan: 1, tetoWoman: 1, egenMan: 0, egenWoman: 0 } },
+                    { text: "상황의 복잡성을 이해하려 하고, 신중하게 접근한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } }
+                ]
+            },
+            {
+                question: "당신은 자신의 감정을 어떻게 표현하는 편인가요?",
+                options: [
+                    { text: "직설적이고 솔직하게 표현한다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "섬세하고 간접적으로 표현하며, 감정을 숨기기도 한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "행동으로 보여주는 것을 더 선호한다.", scores: { tetoMan: 1, tetoWoman: 1, egenMan: 0, egenWoman: 0 } },
+                    { text: "감정의 흐름에 따라 변화하며, 때론 예측 불가능하다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } }
+                ]
+            },
+            {
+                question: "여행 계획을 세울 때, 당신의 스타일은?",
+                options: [
+                    { text: "즉흥적으로 떠나고 현지에서 결정하는 것을 좋아한다.", scores: { tetoMan: 2, tetoWoman: 2, egenMan: 0, egenWoman: 0 } },
+                    { text: "모든 일정을 세밀하게 계획하고 준비하는 것을 선호한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 2, egenWoman: 2 } },
+                    { text: "모험적이고 도전적인 활동을 우선적으로 고려한다.", scores: { tetoMan: 1, tetoWoman: 1, egenMan: 0, egenWoman: 0 } },
+                    { text: "편안하고 여유로운 휴식을 중요하게 생각한다.", scores: { tetoMan: 0, tetoWoman: 0, egenMan: 1, egenWoman: 1 } }
+                ]
+            }
+        ];
+
+        // Detailed definitions for each type
+        const typeDefinitions = {
+            tetoMan: {
+                name: "테토남 (테스토스테론 남성)",
+                oneLiner: "목표 지향적이고 추진력 넘치는 리더! 앞만 보고 달리는 쾌남 스타일!",
+                summary: "테토남은 생물학적 수치와는 무관하게, 사회적·행동적 특성에서 남성적인 자질이 강하게 드러나는 남성을 뜻합니다. 공격성, 리더십, 논리적 사고가 특징이며 현실 지향적이고 도전과 모험을 즐깁니다.",
+                loveStyle: "감정보다는 행동으로 표현하는 타입입니다. 공감 능력은 낮은 편이나, 필요한 순간엔 시원하게 행동합니다. 애교나 감성적 교류는 적으며, 대시를 받기보단 직접 하는 것이 편합니다.",
+                socialTrait: "외향성이 강한 경우 친구 및 약속이 많고, 가만히 있는 것을 못 참으며 활동량이 많습니다. 단체 활동이나 실용적인 커뮤니케이션에 강점이 있습니다.",
+                goodCompatibility: "부드러운 여성성과 섬세한 감수성을 지닌 **에겐녀**에게 끌립니다. 서로의 부족한 면을 채워주는 조합입니다.",
+                badCompatibility: "양기 성향이 강한 **테토녀**와는 주도권 다툼이나 잦은 갈등이 발생할 수 있습니다. 외형적 매력은 있으나, 성향적으로 부딪히는 경우가 많습니다.",
+                needs: "때로는 주변 사람들의 감정에도 귀 기울이는 섬세함이 필요해요. '나'보다는 '우리'를 생각하는 여유를 가져보세요.",
+                extraContent: "액션 영화, 스포츠 경기 관람, 경영/창업 관련 서적. 사업가, 팀 리더, 엔지니어 등 목표 지향적이고 추진력이 필요한 직업이 잘 어울립니다.",
+                characterImage: "https://placehold.co/150x150/FF6384/FFFFFF?text=Teto-M" // Placeholder image URL
+            },
+            egenMan: {
+                name: "에겐남 (에스트로겐 남성)",
+                oneLiner: "감수성 풍부하고 섬세한 내면의 탐구자! 분위기 메이커보다는 공감 능력자!",
+                summary: "에겐남은 감정과 내면을 중요시하는 수동적이고 부드러운 남성 유형입니다. 감수성과 섬세함이 드러나며, 예민한 편입니다. 추상적인 개념에 흥미가 많고 내면 지향적입니다.",
+                loveStyle: "연애에서 수동적인 경향이 있으며, 대시보다는 받는 쪽이 더 편합니다. 감정 표현을 행동보다는 말이나 분위기로 전하며, 섬세하고 공감적인 교류를 중시합니다.",
+                socialTrait: "혼자만의 시간을 중요하게 여깁니다. 움직임보다는 정적인 활동(독서, 영화, 전시 감상 등)을 선호합니다. 소셜미디어 활동에 익숙하며 자신의 취향을 세밀하게 표현하는 데 능숙합니다.",
+                goodCompatibility: "자신에게 부족한 추진력과 에너지를 지닌 **테토녀**에게 매력을 느낍니다. 서로 다른 매력이 시너지를 낼 수 있습니다.",
+                badCompatibility: "감성적이고 섬세한 **에겐녀**와는 감정선이 겹쳐 피로감을 느끼거나 '동족혐오'를 경험할 수도 있습니다. 서로 너무 잘 알아서 생기는 어려움이 있을 수 있어요.",
+                needs: "가끔은 내면의 세계에서 벗어나 외부로 에너지를 발산하는 연습이 필요해요. 과감한 결정과 추진력을 길러보는 건 어떨까요?",
+                extraContent: "잔잔한 음악 플레이리스트, 독립 영화, 에세이. 예술가, 디자이너, 상담사, 연구원 등 섬세한 감각과 깊은 사고가 필요한 직업이 잘 어울립니다.",
+                characterImage: "https://placehold.co/150x150/36A2EB/FFFFFF?text=Egen-M"
+            },
+            tetoWoman: {
+                name: "테토녀 (테스토스테론 여성)",
+                oneLiner: "활기차고 독립적인 커리어 우먼! 당차고 시원시원한 매력의 소유자!",
+                summary: "테토녀는 능동적이고 독립적인 성향의 여성 유형입니다. 활발하고 적극적이며, 도전적인 태도를 지닙니다. 단순한 사고 구조를 가질 수 있으며, 감정보다 상황을 빠르게 판단하는 경향이 있습니다.",
+                loveStyle: "호감 있는 이성에게 먼저 대시하는 것이 어렵지 않습니다. 감정 표현에 있어서 직설적인 편이며, 감추기보다는 드러내는 경향이 있습니다. 커리어나 자기계발에 집중하는 시기도 많습니다.",
+                socialTrait: "운동을 즐기거나 활동적인 취미를 가진 경우가 많습니다. 전반적으로 ‘건강한 느낌’의 라이프스타일을 가지며, 외향적인 경우 남사친이 많거나 이성과의 자연스러운 관계 형성이 익숙합니다.",
+                goodCompatibility: "자신보다 더 강한 양기와 남성적인 매력을 가진 **테토남**에게 자연스럽게 끌립니다. 서로의 강한 에너지가 좋은 시너지를 냅니다.",
+                badCompatibility: "남성성이나 주도성 면에서 아쉬움을 느끼게 하는 **에겐남**과는 연애 코드가 어긋나는 경우가 있습니다. 섬세한 감정선이 때로는 부담스러울 수 있어요.",
+                needs: "때로는 목표를 잠시 내려놓고 감성적인 면을 돌볼 필요가 있어요. 주변의 작은 행복과 감정적 교류에 더 집중해 보세요.",
+                extraContent: "자기계발 서적, 스포츠 다큐멘터리, 재테크 정보. 프로젝트 매니저, 영업, 개발자, 스포츠 강사 등 활동적이고 성취 지향적인 직업이 잘 어울립니다.",
+                characterImage: "https://placehold.co/150x150/FFCE56/FFFFFF?text=Teto-W"
+            },
+            egenWoman: {
+                name: "에겐녀 (에스트로겐 여성)",
+                oneLiner: "부드럽고 감성적인 공감 요정! 섬세한 내면으로 세상을 바라보는 스타일!",
+                summary: "에겐녀는 부드럽고 감성적인 정서 중심의 여성 유형입니다. 일반적으로 사람들이 떠올리는 ‘여성스러운 이미지’에 가까우며, 섬세하고 정적인 분위기를 가진 경우가 많습니다.",
+                loveStyle: "수동적인 태도를 보이는 경우가 많으며, 먼저 대시하기보다 이끌리는 연애를 경험하는 편입니다. 감성적 유대와 공감 중심의 관계를 선호하며, 관계의 온도와 정서적 교감이 중요합니다.",
+                socialTrait: "부드럽고 정적인 분위기를 가진 경우가 많습니다. 온화하고 조용한 이미지로, 학창시절에도 눈에 띄게 행동하기보다는 조용한 위치에 있었던 경우가 많습니다.",
+                goodCompatibility: "자신의 감수성과 정서를 잘 이해해주는 **에겐남**에게 끌리는 경향이 있습니다. 서로의 섬세함을 존중하며 안정적인 관계를 형성할 수 있습니다.",
+                badCompatibility: "강한 양기와 직선적인 태도를 지닌 **테토남**에게 감정적으로 압도되거나 부담스러움을 느껴 거리감을 가질 수 있습니다. 강한 에너지가 때로는 버거울 수 있어요.",
+                needs: "점점 더 강인하고 독립적인 존재로 성장할 수 있어요. 자신의 감정에 솔직하면서도 때로는 단호하게 자신을 표현하는 연습이 필요합니다.",
+                extraContent: "감성적인 드라마, 웹툰, 로맨스 소설, 브이로그. 유치원 교사, 간호사, 사회복지사, 플로리스트 등 섬세한 감정 교류와 돌봄이 필요한 직업이 잘 어울립니다.",
+                characterImage: "https://placehold.co/150x150/4BC0C0/FFFFFF?text=Egen-W"
+            }
+        };
+
+        // ----------------------------------------------------
+        // 2. DOM element retrieval and initialization
+        // ----------------------------------------------------
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const startButton = document.getElementById('start-button');
+        const directTypeInput = document.getElementById('direct-type-input');
+        const directTypeButton = document.getElementById('direct-type-button');
+
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const currentQuestionNum = document.getElementById('current-question-num');
+        const totalQuestionsNum = document.getElementById('total-questions-num');
+        const progressBar = document.getElementById('progress-bar');
+
+        const resultCharacterImage = document.getElementById('result-character-image');
+        const resultTypeName = document.getElementById('result-type-name');
+        const resultOneLiner = document.getElementById('result-one-liner');
+        const resultSummary = document.getElementById('result-summary');
+        const resultLoveStyle = document.getElementById('result-love-style');
+        const resultSocialTrait = document.getElementById('result-social-trait');
+        const resultGoodCompatibility = document.getElementById('result-good-compatibility');
+        const resultBadCompatibility = document.getElementById('result-bad-compatibility');
+        const resultNeeds = document.getElementById('result-needs');
+        const resultExtraContent = document.getElementById('result-extra-content');
+        const restartButton = document.getElementById('restart-button');
+
+        const messageModal = document.getElementById('message-modal');
+        const modalMessage = document.getElementById('modal-message');
+        const closeModalButton = document.getElementById('close-modal-button');
+        const modalOkButton = document.getElementById('modal-ok-button');
+
+        let currentQuestionIndex = 0;
+        let userScores = { tetoMan: 0, egenMan: 0, tetoWoman: 0, egenWoman: 0 };
+
+        // ----------------------------------------------------
+        // 3. UI and Quiz Logic Functions
+        // ----------------------------------------------------
+
+        // Function to show the message modal
+        function showMessage(message) {
+            modalMessage.innerText = message;
+            modalMessage.style.display = 'flex'; // Make the modal visible
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            messageModal.style.display = 'none'; // Hide the modal (Corrected from modalModal)
+        }
+
+        // Function to start the quiz
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            resultScreen.classList.add('hidden');
+            currentQuestionIndex = 0;
+            userScores = { tetoMan: 0, egenMan: 0, tetoWoman: 0, egenWoman: 0 };
+            totalQuestionsNum.innerText = quizQuestions.length; // Correctly sets total questions to 15
+            displayQuestion();
+            updateProgressBar();
+        }
+
+        // Function to display the current question
+        function displayQuestion() {
+            if (currentQuestionIndex >= quizQuestions.length) {
+                showResult();
+                return;
+            }
+
+            const questionData = quizQuestions[currentQuestionIndex];
+            questionText.innerText = questionData.question;
+            optionsContainer.innerHTML = ''; // Clear previous options
+
+            questionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option.text;
+                // Applying attractive and cute button design
+                button.className = "w-full py-3 px-4 bg-gradient-to-r from-blue-400 to-cyan-500 text-white font-semibold rounded-lg shadow-md hover:from-blue-500 hover:to-cyan-600 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg hover:translate-y-[-2px]";
+                button.onclick = () => selectOption(option.scores);
+                optionsContainer.appendChild(button);
+            });
+
+            currentQuestionNum.innerText = currentQuestionIndex + 1;
+            updateProgressBar();
+        }
+
+        // Function to handle option selection and score accumulation
+        function selectOption(scores) {
+            for (const type in scores) {
+                userScores[type] += scores[type];
+            }
+            currentQuestionIndex++;
+            displayQuestion(); // Display next question or show results
+        }
+
+        // Function to update the progress bar
+        function updateProgressBar() {
+            const progress = (currentQuestionIndex / quizQuestions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Function to display the result screen
+        function showResult(forcedType = null) {
+            quizScreen.classList.add('hidden');
+            startScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            let finalType = forcedType;
+            if (!finalType) {
+                // Determine the final type based on scores
+                let maxScore = -1;
+                for (const type in userScores) {
+                    if (userScores[type] > maxScore) {
+                        maxScore = userScores[type];
+                        finalType = type;
+                    } else if (userScores[type] === maxScore) {
+                        // If scores are tied, the first type encountered with max score is chosen.
+                        // Additional logic can be added here for tie-breaking or showing multiple types.
+                    }
+                }
+            }
+
+            // Populate result data
+            const typeInfo = typeDefinitions[finalType];
+            if (typeInfo) {
+                resultCharacterImage.src = typeInfo.characterImage;
+                resultCharacterImage.alt = `${typeInfo.name} 캐릭터 이미지`;
+                resultTypeName.innerText = typeInfo.name;
+                resultOneLiner.innerText = `"${typeInfo.oneLiner}"`;
+                resultSummary.innerText = typeInfo.summary;
+                resultLoveStyle.innerText = typeInfo.loveStyle;
+                resultSocialTrait.innerText = typeInfo.socialTrait;
+                resultGoodCompatibility.innerText = typeInfo.goodCompatibility;
+                resultBadCompatibility.innerText = typeInfo.badCompatibility;
+                resultNeeds.innerText = typeInfo.needs;
+                resultExtraContent.innerText = typeInfo.extraContent;
+            } else {
+                showMessage("죄송합니다. 정확한 유형 이름을 입력해주세요. (예: 테토남, 에겐남, 테토녀, 에겐녀)");
+                startQuiz(); // Go back to start screen on error
+            }
+        }
+
+        // ----------------------------------------------------
+        // 4. Event Listener Registration
+        // ----------------------------------------------------
+
+        startButton.addEventListener('click', startQuiz);
+        restartButton.addEventListener('click', startQuiz);
+        closeModalButton.addEventListener('click', closeModal);
+        modalOkButton.addEventListener('click', closeModal);
+
+        directTypeButton.addEventListener('click', () => {
+            const input = directTypeInput.value.trim();
+            let matchedType = null;
+            // Find the matching type based on user input (e.g., "테토남" -> "tetoMan")
+            // Normalize input by converting to lowercase and removing spaces for flexible matching
+            const normalizedInput = input.toLowerCase().replace(/\s/g, '');
+
+            for (const key in typeDefinitions) {
+                const normalizedTypeName = typeDefinitions[key].name.toLowerCase().replace(/\s/g, '');
+                // Check if the input is included in the type name, or vice versa (for partial matches)
+                // Example: '테토남' matches '테토남 (테스토스테론 남성)' or '테토' matches '테토남'
+                if (normalizedTypeName.includes(normalizedInput) || normalizedInput.includes(normalizedTypeName.split('(')[0].trim())) {
+                    matchedType = key;
+                    break;
+                }
+            }
+            if (matchedType) {
+                showResult(matchedType);
+            } else {
+                showMessage("죄송합니다. 정확한 유형 이름을 입력해주세요. (예: 테토남, 에겐남, 테토녀, 에겐녀)");
+            }
+        });
+
+        // ----------------------------------------------------
+        // 5. Initial Load: Display Start Screen and Hide Modal
+        // ----------------------------------------------------
+        window.onload = function() {
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            messageModal.style.display = 'none'; // Ensure the modal is hidden when the page loads
+        };
+    </script>
+</body>
+</html>
