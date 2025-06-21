@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ 테오 에겐 성격 테스트 ✨</title>
+    <title>✨ 테토 에겐 성격 테스트 ✨</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -146,10 +146,11 @@
     <div class="container">
         <!-- Main Start Screen -->
         <div id="start-screen" class="flex flex-col items-center justify-center text-center">
-            <h1 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-4">✨ 테오 에겐 성격 테스트 ✨</h1>
+            <!-- 제목 글씨 크기 조정: text-4xl -> text-3xl, lg:text-5xl -> lg:text-4xl -->
+            <h1 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-4 whitespace-nowrap">✨ 테토 에겐 성격 테스트 ✨</h1>
             <p class="text-gray-600 mb-10 text-lg lg:text-xl leading-relaxed">
                 당신은 어떤 호르몬 성향을 가지고 있을까요? <br>
-                재미로 알아보는 나의 테오-에겐 유형!
+                재미로 알아보는 나의 테토-에겐 유형!
             </p>
 
             <!-- 성별 선택 섹션 추가 -->
@@ -198,7 +199,7 @@
 
         <!-- Result Screen -->
         <div id="result-screen" class="hidden text-center">
-            <h2 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-6">당신의 테오 에겐 유형은?</h2>
+            <h2 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-6">당신의 테토 에겐 유형은?</h2>
             <img id="result-character-image" src="" alt="결과 캐릭터 이미지" class="w-44 h-44 rounded-full mx-auto mb-7 border-4 border-purple-500 shadow-xl object-cover transform transition-transform duration-300 hover:scale-105">
             <h3 id="result-type-name" class="text-3xl font-extrabold text-indigo-700 mb-4 animate-pulse"></h3>
             <p id="result-one-liner" class="text-xl font-semibold text-gray-700 mb-6 px-2 italic">
@@ -639,9 +640,10 @@
                 }
             }
             if (matchedType) {
-                // For direct type, we don't enforce gender selection.
-                // However, the selected type should logically match its gender if one was previously selected.
-                // For simplicity, direct type input overrides regular quiz flow.
+                // For direct type, we don't enforce gender selection in the same way as quiz.
+                // It directly shows the result for the entered type.
+                // However, if direct type is used, selectedGender might still be null.
+                // The showResult function will handle it by defaulting if forcedType is provided.
                 showResult(matchedType);
             } else {
                 showMessage("죄송합니다. 정확한 유형 이름을 입력해주세요. (예: 테토남, 테토녀)");
